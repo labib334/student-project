@@ -1,0 +1,12 @@
+# Project-wide ignores
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
+*.iml
+node_modules/
+/dist
+/build
+/target
+.gradle/
