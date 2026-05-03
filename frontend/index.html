@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Course System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 p-10">
+
+<h1 class="text-3xl font-bold mb-6 text-center">
+  Student Course Management 🎓
+</h1>
+
+<!-- ADD STUDENT -->
+<div class="bg-white p-4 rounded shadow mb-6">
+  <h2 class="text-xl font-semibold mb-2">Add Student</h2>
+
+  <input id="name" placeholder="Name" class="border p-2 mr-2">
+  <input id="email" placeholder="Email" class="border p-2 mr-2">
+  <input id="age" placeholder="Age" type="number" class="border p-2 mr-2">
+
+  <button onclick="addStudent()" class="bg-blue-500 text-white px-4 py-2">
+    Add
+  </button>
+</div>
+
+<!-- ADD COURSE -->
+<div class="bg-white p-4 rounded shadow mb-6">
+  <h2 class="text-xl font-semibold mb-2">Add Course</h2>
+
+  <input id="title" placeholder="Title" class="border p-2 mr-2">
+  <input id="desc" placeholder="Description" class="border p-2 mr-2">
+
+  <button onclick="addCourse()" class="bg-green-500 text-white px-4 py-2">
+    Add
+  </button>
+</div>
+
+<!-- ASSIGN COURSE -->
+<div class="bg-white p-4 rounded shadow mb-6">
+  <h2 class="text-xl font-semibold mb-2">Assign Course</h2>
+
+  <input id="studentId" placeholder="Student ID" class="border p-2 mr-2">
+  <input id="courseId" placeholder="Course ID" class="border p-2 mr-2">
+
+  <button onclick="assignCourse()" class="bg-purple-500 text-white px-4 py-2">
+    Assign
+  </button>
+</div>
+
+<!-- STUDENT LIST -->
+<div class="bg-white p-4 rounded shadow mb-6">
+  <h2 class="text-xl font-semibold mb-2">Students</h2>
+
+  <button onclick="loadStudents()" class="bg-gray-800 text-white px-4 py-2 mb-3">
+    Load Students
+  </button>
+
+  <ul id="studentList"></ul>
+</div>
+
+<!-- COURSE LIST (NEW ADDED) -->
+<div class="bg-white p-4 rounded shadow">
+  <h2 class="text-xl font-semibold mb-2">Courses</h2>
+
+  <button onclick="loadCourses()" class="bg-gray-800 text-white px-4 py-2 mb-3">
+    Load Courses
+  </button>
+
+  <ul id="courseList"></ul>
+</div>
+
+<script>
+const BASE_URL = "http://localhost:8080"; // ✅ FIXED
+
+// ADD STUDENT
+async function addStudent() {
+  const student = {
+    name: document.getElementById("name").value,
+    email: document.getElementById("email").value,
+    age: document.getElementById("age").value
+  };
+
+  await fetch(`${BASE_URL}/students`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(student)
+  });
+
+  alert("Student added!");
+}
+
+// ADD COURSE
+async function addCourse() {
+  const course = {
+    title: document.getElementById("title").value,
+    description: document.getElementById("desc").value
+  };
+
+  await fetch(`${BASE_URL}/courses`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(course)
+  });
+
+  alert("Course added!");
+}
+
+// ASSIGN COURSE
+async function assignCourse() {
+  const studentId = document.getElementById("studentId").value;
+  const courseId = document.getElementById("courseId").value;
+
+  await fetch(`${BASE_URL}/students/${studentId}/courses/${courseId}`, {
+    method: "POST"
+  });
+
+  alert("Course assigned!");
+}
+
+// LOAD STUDENTS
+async function loadStudents() {
+  const res = await fetch(`${BASE_URL}/students`);
+  const data = await res.json();
+
+  const list = document.getElementById("studentList");
+  list.innerHTML = "";
+
+  data.forEach(s => {
+    const li = document.createElement("li");
+
+    let courses = "No courses";
+
+    if (s.courses && s.courses.length > 0) {
+      courses = s.courses.map(c => c.title).join(", ");
+    }
+
+    li.textContent = `${s.name} (${s.email}) → Courses: ${courses}`;
+    list.appendChild(li);
+  });
+}
+
+// LOAD COURSES (🔥 NEW)
+async function loadCourses() {
+  const res = await fetch(`${BASE_URL}/courses`);
+  const data = await res.json();
+
+  const list = document.getElementById("courseList");
+  list.innerHTML = "";
+
+  data.forEach(c => {
+    const li = document.createElement("li");
+
+    let students = "No students";
+
+    if (c.students && c.students.length > 0) {
+      students = c.students.map(s => s.name).join(", ");
+    }
+
+    li.textContent = `${c.title} → Students: ${students}`;
+    list.appendChild(li);
+  });
+}
+</script>
+
+</body>
+</html>

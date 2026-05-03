@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student System</title>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+/* animated premium background */
+body {
+  background: linear-gradient(135deg, #0f172a, #1e3a8a, #2563eb);
+  background-size: 300% 300%;
+  animation: gradient 10s ease infinite;
+}
+@keyframes gradient {
+  0% {background-position: 0% 50%;}
+  50% {background-position: 100% 50%;}
+  100% {background-position: 0% 50%;}
+}
+
+/* glass effect */
+.glass {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+/* floating input */
+.input-group {
+  position: relative;
+}
+.input-group input {
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 10px;
+  color: white;
+  outline: none;
+}
+.input-group input:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56,189,248,0.5);
+}
+.input-group label {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  color: #ddd;
+  transition: 0.3s;
+  pointer-events: none;
+}
+.input-group input:focus + label,
+.input-group input:not(:placeholder-shown) + label {
+  top: -8px;
+  left: 10px;
+  font-size: 12px;
+  color: #fff;
+  background: #0ea5e9;
+  padding: 0 5px;
+  border-radius: 5px;
+}
+
+/* buttons */
+.btn {
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #38bdf8, #6366f1);
+  color: white;
+}
+.btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 0 20px rgba(56,189,248,0.7);
+}
+
+/* tabs */
+.active-tab {
+  background: linear-gradient(135deg,#38bdf8,#6366f1);
+  color: white;
+}
+</style>
+</head>
+
+<body class="h-screen flex items-center justify-center">
+
+<div class="glass p-10 rounded-3xl w-96 text-gray-100">
+
+<h2 class="text-3xl font-bold text-center mb-6 tracking-wide">
+🎓 Student System
+</h2>
+
+<!-- Tabs -->
+<div class="flex mb-6 bg-white/20 rounded-xl overflow-hidden">
+  <button onclick="showLogin()" id="loginTab"
+    class="w-1/2 py-2 font-semibold active-tab">
+    Login
+  </button>
+  <button onclick="showRegister()" id="registerTab"
+    class="w-1/2 py-2 font-semibold">
+    Register
+  </button>
+</div>
+
+<!-- LOGIN -->
+<div id="loginForm">
+
+  <div class="input-group mb-4">
+    <input id="luser" placeholder=" " />
+    <label>Username</label>
+  </div>
+
+  <div class="input-group mb-5">
+    <input id="lpass" type="password" placeholder=" " />
+    <label>Password</label>
+  </div>
+
+  <button onclick="login()"
+    class="btn w-full py-2 rounded-xl font-semibold">
+    Login
+  </button>
+
+</div>
+
+<!-- REGISTER -->
+<div id="registerForm" class="hidden">
+
+  <div class="input-group mb-4">
+    <input id="ruser" placeholder=" " />
+    <label>Username</label>
+  </div>
+
+  <div class="input-group mb-5">
+    <input id="rpass" type="password" placeholder=" " />
+    <label>Password</label>
+  </div>
+
+  <button onclick="register()"
+    class="btn w-full py-2 rounded-xl font-semibold">
+    Register
+  </button>
+
+</div>
+
+<p id="msg" class="text-center mt-4 text-sm font-medium"></p>
+
+</div>
+
+<script>
+const BASE_URL = "http://localhost:8080";
+
+// toggle UI
+function showLogin() {
+  loginForm.classList.remove("hidden");
+  registerForm.classList.add("hidden");
+
+  loginTab.classList.add("active-tab");
+  registerTab.classList.remove("active-tab");
+}
+
+function showRegister() {
+  loginForm.classList.add("hidden");
+  registerForm.classList.remove("hidden");
+
+  registerTab.classList.add("active-tab");
+  loginTab.classList.remove("active-tab");
+}
+
+// register
+async function register() {
+  const res = await fetch(`${BASE_URL}/auth/register`, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      username: ruser.value,
+      password: rpass.value
+    })
+  });
+
+  msg.innerText = "✅ Registered successfully!";
+  msg.className = "text-green-300 text-center mt-4";
+}
+
+// login
+async function login() {
+  const res = await fetch(`${BASE_URL}/auth/login`, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      username: luser.value,
+      password: lpass.value
+    })
+  });
+
+  if (res.ok) {
+    msg.innerText = "✅ Login successful!";
+    msg.className = "text-green-300 text-center mt-4";
+
+    setTimeout(() => {
+      window.location.href = "index.html";
+    }, 800);
+  } else {
+    msg.innerText = "❌ Invalid username or password";
+    msg.className = "text-red-300 text-center mt-4";
+  }
+}
+</script>
+
+</body>
+</html>
