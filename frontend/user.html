@@ -3,29 +3,175 @@
 <head>
   <title>User Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+    }
+
+    .glass-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      color: white;
+    }
+
+    .header h1 {
+      font-size: 2.5em;
+      font-weight: 700;
+      margin: 0;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .info-item {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 15px;
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .info-item:hover {
+      transform: scale(1.05);
+    }
+
+    .info-label {
+      font-size: 0.85em;
+      opacity: 0.9;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .info-value {
+      font-size: 1.2em;
+      font-weight: 700;
+      word-break: break-all;
+    }
+
+    .courses-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .course-card {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      padding: 25px;
+      border-radius: 15px;
+      text-align: center;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 30px rgba(245, 87, 108, 0.3);
+    }
+
+    .course-card:hover {
+      transform: translateY(-8px) scale(1.05);
+      box-shadow: 0 20px 50px rgba(245, 87, 108, 0.4);
+    }
+
+    .no-courses {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+      font-size: 1.1em;
+    }
+
+    .btn-logout {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      padding: 12px 30px;
+      border: none;
+      border-radius: 25px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 30px rgba(245, 87, 108, 0.3);
+    }
+
+    .btn-logout:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px rgba(245, 87, 108, 0.4);
+    }
+
+    .btn-logout:active {
+      transform: translateY(-1px);
+    }
+
+    @media (max-width: 768px) {
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+      .header h1 {
+        font-size: 1.8em;
+      }
+    }
+  </style>
 </head>
 
-<body class="bg-gray-100 min-h-screen p-10">
+<body>
 
-<h1 class="text-3xl text-center mb-8">🎓 My Dashboard</h1>
-
-<div class="bg-white p-6 rounded shadow mb-6 max-w-xl mx-auto">
-  <h2 class="text-xl mb-3">My Info</h2>
-
-  <p><b>Name:</b> <span id="name"></span></p>
-  <p><b>Email:</b> <span id="email"></span></p>
-  <p><b>Department:</b> <span id="dept"></span></p>
+<div class="header">
+  <h1>🎓 My Dashboard</h1>
 </div>
 
-<div class="bg-white p-6 rounded shadow max-w-xl mx-auto">
-  <h2 class="text-xl mb-3">My Courses</h2>
-  <ul id="list"></ul>
-</div>
+<div class="max-w-6xl mx-auto">
+  <!-- Info Cards -->
+  <div class="glass-card p-8 mb-8">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800">📋 Student Information</h2>
+    <div class="info-grid">
+      <div class="info-item">
+        <div class="info-label">👤 Name</div>
+        <div class="info-value" id="name">Loading...</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">📧 Email</div>
+        <div class="info-value" id="email">Loading...</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">🏢 Department</div>
+        <div class="info-value" id="dept">Loading...</div>
+      </div>
+    </div>
+  </div>
 
-<div class="text-center mt-6">
-  <button onclick="logout()" class="bg-red-500 text-white px-6 py-2 rounded">
-    Logout
-  </button>
+  <!-- Courses Section -->
+  <div class="glass-card p-8 mb-8">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800">📚 My Courses</h2>
+    <div id="list" class="courses-container"></div>
+  </div>
+
+  <!-- Logout Button -->
+  <div class="text-center">
+    <button onclick="logout()" class="btn-logout">
+      🚪 Logout
+    </button>
+  </div>
 </div>
 
 <script>

@@ -1,101 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Admin Dashboard</title>
-<script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Modern LMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-link.active { background: rgba(59, 130, 246, 0.1); border-right: 4px solid #3b82f6; color: #3b82f6; }
+        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(231, 231, 231, 1); }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+    </style>
 </head>
 
-<body class="bg-gray-100 flex">
+<body class="bg-[#f8fafc] flex min-h-screen">
 
 <!-- SIDEBAR -->
-<div class="w-64 h-screen bg-gray-900 text-white p-5">
-  <h2 class="text-2xl font-bold mb-8">🎓 Admin</h2>
-
-  <ul class="space-y-3">
-    <li><button onclick="show('dashboard')" class="w-full text-left hover:bg-gray-700 p-2 rounded">🏠 Dashboard</button></li>
-    <li><button onclick="show('students')" class="w-full text-left hover:bg-gray-700 p-2 rounded">👨‍🎓 Students</button></li>
-    <li><button onclick="show('courses')" class="w-full text-left hover:bg-gray-700 p-2 rounded">📚 Courses</button></li>
-    <li><button onclick="show('assign')" class="w-full text-left hover:bg-gray-700 p-2 rounded">🔗 Assign</button></li>
-  </ul>
-</div>
-
-<!-- MAIN -->
-<div class="flex-1 p-8">
-
-<!-- DASHBOARD -->
-<div id="dashboard">
-  <h1 class="text-3xl font-bold mb-6">Dashboard</h1>
-
-  <div class="grid grid-cols-2 gap-6">
-    <div class="bg-white p-6 rounded shadow">
-      <h2 class="font-bold mb-3">Student → Courses</h2>
-      <button onclick="loadStudents()" class="bg-blue-500 text-white px-3 py-1 rounded">Load</button>
-      <ul id="studentCourses" class="mt-3 text-sm"></ul>
+<aside class="w-72 bg-white border-r border-gray-200 flex flex-col sticky top-0 h-screen">
+    <div class="p-8">
+        <h2 class="text-2xl font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent flex items-center gap-2">
+            <i class="fas fa-graduation-cap"></i> AdminPro
+        </h2>
     </div>
 
-    <div class="bg-white p-6 rounded shadow">
-      <h2 class="font-bold mb-3">Course → Students</h2>
-      <button onclick="loadCourses()" class="bg-green-500 text-white px-3 py-1 rounded">Load</button>
-      <ul id="courseStudents" class="mt-3 text-sm"></ul>
+    <nav class="flex-1 px-4 space-y-2">
+        <button onclick="show('dashboard')" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-all">
+            <i class="fas fa-chart-line"></i> Dashboard
+        </button>
+        <button onclick="show('students')" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-all">
+            <i class="fas fa-user-graduate"></i> Students
+        </button>
+        <button onclick="show('courses')" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-all">
+            <i class="fas fa-book"></i> Courses
+        </button>
+        <button onclick="show('assign')" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-all">
+            <i class="fas fa-link"></i> Assign
+        </button>
+    </nav>
+
+    <div class="p-6 border-t border-gray-100">
+        <div class="bg-blue-50 p-4 rounded-xl">
+            <p class="text-xs font-semibold text-blue-600 uppercase tracking-wider">Status</p>
+            <p class="text-sm text-blue-800 font-medium">System Online</p>
+        </div>
     </div>
-  </div>
-</div>
+</aside>
 
-<!-- STUDENTS -->
-<div id="students" class="hidden">
-  <h1 class="text-2xl font-bold mb-4">Student Panel</h1>
+<!-- MAIN CONTENT -->
+<main class="flex-1 flex flex-col overflow-hidden">
+    
+    <!-- TOP HEADER -->
+    <header class="h-20 bg-white/80 backdrop-blur-md border-b border-gray-200 px-8 flex items-center justify-between sticky top-0 z-10">
+        <h1 id="page-title" class="text-xl font-bold text-gray-800">Overview</h1>
+        <div class="flex items-center gap-4">
+            <div class="h-10 w-10 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold">
+                A
+            </div>
+        </div>
+    </header>
 
-  <div class="bg-white p-5 rounded shadow mb-6">
-    <input id="name" placeholder="Name" class="border p-2 rounded">
-    <input id="email" list="studentEmails" placeholder="Email" class="border p-2 rounded">
-    <datalist id="studentEmails"></datalist>
-    <input id="age" placeholder="Age" class="border p-2 rounded">
-    <input id="dept" placeholder="Department" class="border p-2 rounded">
+    <div class="p-8 overflow-y-auto custom-scrollbar">
 
-    <button onclick="addStudent()" class="bg-blue-500 text-white px-4 py-2 rounded mt-2">
-      Add Student
-    </button>
-  </div>
+        <!-- DASHBOARD SECTION -->
+        <div id="dashboard" class="space-y-8 animate-in fade-in duration-500">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Student View -->
+                <div class="glass-card rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-bold text-gray-800">Student &rarr; Enrolled Courses</h2>
+                        <button onclick="loadStudents()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                    <ul id="studentCourses" class="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                        <li class="text-gray-400 text-center py-10 italic">No data loaded yet</li>
+                    </ul>
+                </div>
 
-  <div class="bg-white p-5 rounded shadow">
-    <h2 class="font-semibold mb-3">Delete Student</h2>
-    <input id="delStudentId" placeholder="Student ID" class="border p-2 rounded">
-    <button onclick="deleteStudent()" class="bg-red-500 text-white px-4 py-2 rounded">Delete</button>
-  </div>
-</div>
+                <!-- Course View -->
+                <div class="glass-card rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-bold text-gray-800">Course &rarr; Enrolled Students</h2>
+                        <button onclick="loadCourses()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                    <ul id="courseStudents" class="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                        <li class="text-gray-400 text-center py-10 italic">No data loaded yet</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
 
-<!-- COURSES -->
-<div id="courses" class="hidden">
-  <h1 class="text-2xl font-bold mb-4">Course Panel</h1>
+        <!-- STUDENTS SECTION -->
+        <div id="students" class="hidden space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+            <div class="max-w-3xl">
+                <div class="glass-card rounded-2xl shadow-sm p-8 mb-8">
+                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                        <i class="fas fa-user-plus text-blue-500"></i> Register New Student
+                    </h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <input id="name" placeholder="Full Name" class="border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50 transition-all">
+                        <input id="email" list="studentEmails" placeholder="Email Address" class="border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50 transition-all">
+                        <datalist id="studentEmails"></datalist>
+                        <input id="age" type="number" placeholder="Age" class="border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50 transition-all">
+                        <input id="dept" placeholder="Department (e.g. CSE)" class="border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50 transition-all">
+                    </div>
+                    <button onclick="addStudent()" class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-200 transition-all">
+                        Complete Registration
+                    </button>
+                </div>
 
-  <div class="bg-white p-5 rounded shadow mb-6">
-    <input id="title" placeholder="Title" class="border p-2 rounded w-full mb-2">
-    <input id="desc" placeholder="Description" class="border p-2 rounded w-full">
+                <div class="bg-red-50 border border-red-100 rounded-2xl p-6">
+                    <h2 class="text-red-700 font-bold mb-4 flex items-center gap-2"><i class="fas fa-trash-alt"></i> Danger Zone</h2>
+                    <div class="flex gap-3">
+                        <input id="delStudentId" placeholder="Enter Student ID" class="flex-1 border border-red-200 p-3 rounded-xl focus:ring-2 focus:ring-red-500 outline-none transition-all">
+                        <button onclick="deleteStudent()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-xl font-bold transition-all">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <button onclick="addCourse()" class="mt-3 bg-green-500 text-white px-4 py-2 rounded">Add</button>
-  </div>
+        <!-- COURSES SECTION -->
+        <div id="courses" class="hidden space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+            <div class="max-w-3xl">
+                <div class="glass-card rounded-2xl shadow-sm p-8 mb-8">
+                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                        <i class="fas fa-book-medical text-indigo-500"></i> Create New Course
+                    </h2>
+                    <div class="space-y-4">
+                        <input id="title" placeholder="Course Title" class="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none bg-gray-50 transition-all">
+                        <textarea id="desc" placeholder="Course Description" rows="3" class="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none bg-gray-50 transition-all"></textarea>
+                    </div>
+                    <button onclick="addCourse()" class="w-full mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-200 transition-all">
+                        Publish Course
+                    </button>
+                </div>
 
-  <div class="bg-white p-5 rounded shadow">
-    <h2 class="font-semibold mb-3">Delete Course</h2>
-    <input id="delCourseId" placeholder="Course ID" class="border p-2 rounded">
-    <button onclick="deleteCourse()" class="bg-red-500 text-white px-4 py-2 rounded">Delete</button>
-  </div>
-</div>
+                <div class="bg-red-50 border border-red-100 rounded-2xl p-6">
+                    <h2 class="text-red-700 font-bold mb-4 flex items-center gap-2"><i class="fas fa-folder-minus"></i> Remove Course</h2>
+                    <div class="flex gap-3">
+                        <input id="delCourseId" placeholder="Enter Course ID" class="flex-1 border border-red-200 p-3 rounded-xl focus:ring-2 focus:ring-red-500 outline-none transition-all">
+                        <button onclick="deleteCourse()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-xl font-bold transition-all">Remove</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<!-- ASSIGN -->
-<div id="assign" class="hidden">
-  <h1 class="text-2xl font-bold mb-4">Assign Course</h1>
+        <!-- ASSIGN SECTION -->
+        <div id="assign" class="hidden space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+            <div class="max-w-2xl mx-auto mt-12">
+                <div class="glass-card rounded-3xl shadow-xl p-10 text-center border-2 border-dashed border-purple-100">
+                    <div class="h-20 w-20 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Enrollment Desk</h2>
+                    <p class="text-gray-500 mb-8">Connect students with their respective courses</p>
+                    
+                    <div class="space-y-4 max-w-xs mx-auto">
+                        <div class="text-left">
+                            <label class="text-xs font-bold text-gray-400 uppercase ml-1">Student ID</label>
+                            <input id="sid" placeholder="e.g. 101" class="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none text-center font-bold text-lg">
+                        </div>
+                        <div class="text-left text-center">
+                            <i class="fas fa-arrow-down text-gray-300"></i>
+                        </div>
+                        <div class="text-left">
+                            <label class="text-xs font-bold text-gray-400 uppercase ml-1">Course ID</label>
+                            <input id="cid" placeholder="e.g. 505" class="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none text-center font-bold text-lg">
+                        </div>
+                    </div>
 
-  <div class="bg-white p-5 rounded shadow">
-    <input id="sid" placeholder="Student ID" class="border p-2 rounded">
-    <input id="cid" placeholder="Course ID" class="border p-2 rounded">
+                    <button onclick="assign()" class="w-full mt-10 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-4 rounded-2xl shadow-xl shadow-purple-200 transition-all transform hover:-translate-y-1">
+                        Confirm Enrollment
+                    </button>
+                </div>
+            </div>
+        </div>
 
-    <button onclick="assign()" class="bg-purple-500 text-white px-4 py-2 rounded">Assign</button>
-  </div>
-</div>
-
-</div>
+    </div>
+</main>
 
 <script>
 const BASE_URL = "http://localhost:8080";
@@ -105,11 +192,23 @@ function show(section) {
     document.getElementById(id).classList.add("hidden");
   });
   document.getElementById(section).classList.remove("hidden");
+  
+  // UI logic for title and sidebar state
+  const titles = { 'dashboard': 'Overview', 'students': 'Student Management', 'courses': 'Course Catalog', 'assign': 'Course Enrollment' };
+  document.getElementById('page-title').innerText = titles[section];
+  
+  // Highlight active sidebar link
+  document.querySelectorAll('.sidebar-link').forEach(btn => {
+      btn.classList.remove('active');
+      if(btn.innerText.toLowerCase().includes(section)) btn.classList.add('active');
+  });
 }
 
-// ✅ ADD STUDENT (FIXED)
-async function addStudent() {
+// Initial active state
+document.addEventListener('DOMContentLoaded', () => show('dashboard'));
 
+// ✅ ADD STUDENT
+async function addStudent() {
   const nameVal = document.getElementById("name").value.trim();
   const emailVal = document.getElementById("email").value.trim();
   const ageVal = document.getElementById("age").value;
@@ -127,41 +226,30 @@ async function addStudent() {
     department: deptVal
   };
 
-  console.log("Sending:", student); // DEBUG
-
   try {
-    const res = await fetch("http://localhost:8080/students", {
+    const res = await fetch(`${BASE_URL}/students`, {
       method: "POST",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify(student)
     });
 
     const text = await res.text();
-    console.log("Response:", text);
-
-    if (!res.ok) {
-      throw new Error(text);
-    }
-
-    alert("✅ Student Added");
-
+    if (!res.ok) throw new Error(text);
+    alert("✅ Student Added Successfully");
   } catch (err) {
-    alert("❌ " + err.message);
+    alert("❌ Error: " + err.message);
   }
 }
 
 // ✅ DELETE STUDENT
 async function deleteStudent() {
   const id = delStudentId.value;
-
+  if(!id) return alert("Enter Student ID");
   try {
     const res = await fetch(`${BASE_URL}/students/${id}`, { method: "DELETE" });
-
     if (!res.ok) throw new Error("Delete failed");
-
-    alert("Deleted");
+    alert("✅ Student Deleted");
     loadStudents();
-
   } catch (err) {
     alert("❌ " + err.message);
   }
@@ -178,11 +266,8 @@ async function addCourse() {
         description: desc.value
       })
     });
-
     if (!res.ok) throw new Error("Failed");
-
-    alert("Course Added");
-
+    alert("✅ Course Added Successfully");
   } catch (err) {
     alert("❌ " + err.message);
   }
@@ -190,16 +275,13 @@ async function addCourse() {
 
 // ✅ DELETE COURSE
 async function deleteCourse() {
+  const id = delCourseId.value;
+  if(!id) return alert("Enter Course ID");
   try {
-    const res = await fetch(`${BASE_URL}/courses/${delCourseId.value}`, {
-      method: "DELETE"
-    });
-
+    const res = await fetch(`${BASE_URL}/courses/${id}`, { method: "DELETE" });
     if (!res.ok) throw new Error("Delete failed");
-
-    alert("Deleted");
+    alert("✅ Course Deleted");
     loadCourses();
-
   } catch (err) {
     alert("❌ " + err.message);
   }
@@ -211,80 +293,91 @@ async function assign() {
     const res = await fetch(`${BASE_URL}/students/${sid.value}/courses/${cid.value}`, {
       method: "POST"
     });
-
-    if (!res.ok) throw new Error("Invalid ID");
-
-    alert("Assigned");
-
-    // 🔥 DELAY FIX (UI update)
-    setTimeout(() => {
-      loadStudents();
-      loadCourses();
-    }, 300);
-
+    if (!res.ok) throw new Error("Invalid Student or Course ID");
+    alert("✅ Enrollment Successful");
+    setTimeout(() => { loadStudents(); loadCourses(); }, 300);
   } catch (err) {
     alert("❌ " + err.message);
   }
 }
-// VIEW
+
+// VIEW HANDLERS (Improved styling for list items)
 async function loadStudents() {
-  const res = await fetch(`${BASE_URL}/students`);
-  const data = await res.json();
+  const container = document.getElementById("studentCourses");
+  container.innerHTML = `<div class="flex justify-center p-4"><i class="fas fa-spinner fa-spin text-blue-500"></i></div>`;
+  
+  try {
+    const res = await fetch(`${BASE_URL}/students`);
+    const data = await res.json();
+    container.innerHTML = "";
 
-  console.log("STUDENTS:", data); // 🔥 DEBUG
+    data.forEach(s => {
+      const name = s.name || s.username || "Unknown";
+      const courses = s.courses && s.courses.length > 0
+        ? s.courses.map(c => `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">${c.title}</span>`).join(" ")
+        : "<span class='text-gray-400'>No courses</span>";
 
-  studentCourses.innerHTML = "";
-
-  data.forEach(s => {
-    const li = document.createElement("li");
-
-    // 🔥 fallback fix
-    const name = s.name || s.username || "Unknown";
-
-    const courses = s.courses && s.courses.length > 0
-      ? s.courses.map(c => c.title).join(", ")
-      : "No course";
-
-    li.innerText = `${name} → ${courses}`;
-
-    studentCourses.appendChild(li);
-  });
+      const li = document.createElement("li");
+      li.className = "bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col gap-2";
+      li.innerHTML = `
+        <div class="flex justify-between items-center">
+            <span class="font-bold text-gray-700">${name}</span>
+            <span class="text-[10px] text-gray-400 font-mono">ID: ${s.id || 'N/A'}</span>
+        </div>
+        <div class="flex flex-wrap gap-1">${courses}</div>
+      `;
+      container.appendChild(li);
+    });
+  } catch (e) { container.innerHTML = "Error loading students"; }
 }
+
 async function loadCourses() {
-  const res = await fetch(`${BASE_URL}/courses`);
-  const data = await res.json();
+  const container = document.getElementById("courseStudents");
+  container.innerHTML = `<div class="flex justify-center p-4"><i class="fas fa-spinner fa-spin text-indigo-500"></i></div>`;
 
-  console.log("COURSES:", data); // 🔥 DEBUG
+  try {
+    const res = await fetch(`${BASE_URL}/courses`);
+    const data = await res.json();
+    container.innerHTML = "";
 
-  courseStudents.innerHTML = "";
+    data.forEach(c => {
+      const students = c.students && c.students.length > 0
+        ? c.students.map(s => `<span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-xs font-bold">${s.name || s.username}</span>`).join(" ")
+        : "<span class='text-gray-400'>No students enrolled</span>";
 
-  data.forEach(c => {
-    const li = document.createElement("li");
-
-    const students = c.students && c.students.length > 0
-      ? c.students.map(s => s.name || s.username).join(", ")
-      : "No student";
-
-    li.innerText = `${c.title} → ${students}`;
-
-    courseStudents.appendChild(li);
-  });
+      const li = document.createElement("li");
+      li.className = "bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col gap-2";
+      li.innerHTML = `
+        <div class="flex justify-between items-center">
+            <span class="font-bold text-gray-700">${c.title}</span>
+            <span class="text-[10px] text-gray-400 font-mono">ID: ${c.id || 'N/A'}</span>
+        </div>
+        <div class="flex flex-wrap gap-1">${students}</div>
+      `;
+      container.appendChild(li);
+    });
+  } catch (e) { container.innerHTML = "Error loading courses"; }
 }
 
 async function populateStudentEmailList() {
   try {
-    const res = await fetch(`${BASE_URL}/students`);
-    if (!res.ok) return;
-    const students = await res.json();
-    studentEmails.innerHTML = "";
-    students.forEach(s => {
+    const [studentsRes, usersRes] = await Promise.all([
+      fetch(`${BASE_URL}/students`),
+      fetch(`${BASE_URL}/auth/emails`)
+    ]);
+    const students = studentsRes.ok ? await studentsRes.json() : [];
+    const userEmails = usersRes.ok ? await usersRes.json() : [];
+    const emailSet = new Set();
+    students.forEach(s => s.email && emailSet.add(s.email));
+    userEmails.forEach(email => email && emailSet.add(email));
+    const dl = document.getElementById("studentEmails");
+    dl.innerHTML = "";
+    emailSet.forEach(email => {
       const option = document.createElement("option");
-      option.value = s.email;
-      studentEmails.appendChild(option);
+      option.value = email;
+      dl.appendChild(option);
     });
-  } catch (err) {
-    console.warn("Unable to load student emails", err);
-  }
+  } catch (err) { console.warn("Unable to load student emails", err); }
 }
 
 window.addEventListener("DOMContentLoaded", populateStudentEmailList);
