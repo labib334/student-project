@@ -22,4 +22,14 @@ public class CourseService {
     public List<Course> getAll() {
         return repo.findAll();
     }
+
+    public void delete(Long id) {
+        Course course = repo.findById(id).orElseThrow();
+
+        if (course.getStudents() != null) {
+            course.getStudents().clear();
+        }
+
+        repo.delete(course);
+    }
 }

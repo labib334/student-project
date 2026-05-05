@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 flex">
+
+<!-- SIDEBAR -->
+<div class="w-64 h-screen bg-gray-900 text-white p-5">
+  <h2 class="text-2xl font-bold mb-8">🎓 Admin</h2>
+
+  <ul class="space-y-3">
+    <li><button onclick="show('dashboard')" class="w-full text-left hover:bg-gray-700 p-2 rounded">🏠 Dashboard</button></li>
+    <li><button onclick="show('students')" class="w-full text-left hover:bg-gray-700 p-2 rounded">👨‍🎓 Students</button></li>
+    <li><button onclick="show('courses')" class="w-full text-left hover:bg-gray-700 p-2 rounded">📚 Courses</button></li>
+    <li><button onclick="show('assign')" class="w-full text-left hover:bg-gray-700 p-2 rounded">🔗 Assign</button></li>
+  </ul>
+</div>
+
+<!-- MAIN -->
+<div class="flex-1 p-8">
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <h1 class="text-3xl font-bold mb-6">Dashboard</h1>
+
+  <div class="grid grid-cols-2 gap-6">
+    <div class="bg-white p-6 rounded shadow">
+      <h2 class="font-bold mb-3">Student → Courses</h2>
+      <button onclick="loadStudents()" class="bg-blue-500 text-white px-3 py-1 rounded">Load</button>
+      <ul id="studentCourses" class="mt-3 text-sm"></ul>
+    </div>
+
+    <div class="bg-white p-6 rounded shadow">
+      <h2 class="font-bold mb-3">Course → Students</h2>
+      <button onclick="loadCourses()" class="bg-green-500 text-white px-3 py-1 rounded">Load</button>
+      <ul id="courseStudents" class="mt-3 text-sm"></ul>
+    </div>
+  </div>
+</div>
+
+<!-- STUDENTS -->
+<div id="students" class="hidden">
+  <h1 class="text-2xl font-bold mb-4">Student Panel</h1>
+
+  <div class="bg-white p-5 rounded shadow mb-6">
+    <input id="name" placeholder="Name" class="border p-2 rounded">
+    <input id="email" list="studentEmails" placeholder="Email" class="border p-2 rounded">
+    <datalist id="studentEmails"></datalist>
+    <input id="age" placeholder="Age" class="border p-2 rounded">
+    <input id="dept" placeholder="Department" class="border p-2 rounded">
+
+    <button onclick="addStudent()" class="bg-blue-500 text-white px-4 py-2 rounded mt-2">
+      Add Student
+    </button>
+  </div>
+
+  <div class="bg-white p-5 rounded shadow">
+    <h2 class="font-semibold mb-3">Delete Student</h2>
+    <input id="delStudentId" placeholder="Student ID" class="border p-2 rounded">
+    <button onclick="deleteStudent()" class="bg-red-500 text-white px-4 py-2 rounded">Delete</button>
+  </div>
+</div>
+
+<!-- COURSES -->
+<div id="courses" class="hidden">
+  <h1 class="text-2xl font-bold mb-4">Course Panel</h1>
+
+  <div class="bg-white p-5 rounded shadow mb-6">
+    <input id="title" placeholder="Title" class="border p-2 rounded w-full mb-2">
+    <input id="desc" placeholder="Description" class="border p-2 rounded w-full">
+
+    <button onclick="addCourse()" class="mt-3 bg-green-500 text-white px-4 py-2 rounded">Add</button>
+  </div>
+
+  <div class="bg-white p-5 rounded shadow">
+    <h2 class="font-semibold mb-3">Delete Course</h2>
+    <input id="delCourseId" placeholder="Course ID" class="border p-2 rounded">
+    <button onclick="deleteCourse()" class="bg-red-500 text-white px-4 py-2 rounded">Delete</button>
+  </div>
+</div>
+
+<!-- ASSIGN -->
+<div id="assign" class="hidden">
+  <h1 class="text-2xl font-bold mb-4">Assign Course</h1>
+
+  <div class="bg-white p-5 rounded shadow">
+    <input id="sid" placeholder="Student ID" class="border p-2 rounded">
+    <input id="cid" placeholder="Course ID" class="border p-2 rounded">
+
+    <button onclick="assign()" class="bg-purple-500 text-white px-4 py-2 rounded">Assign</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+const BASE_URL = "http://localhost:8080";
+
+function show(section) {
+  ["dashboard","students","courses","assign"].forEach(id => {
+    document.getElementById(id).classList.add("hidden");
+  });
+  document.getElementById(section).classList.remove("hidden");
+}
+
+// ✅ ADD STUDENT (FIXED)
+async function addStudent() {
+
+  const nameVal = document.getElementById("name").value.trim();
+  const emailVal = document.getElementById("email").value.trim();
+  const ageVal = document.getElementById("age").value;
+  const deptVal = document.getElementById("dept").value.trim();
+
+  if (!nameVal || !emailVal) {
+    alert("❌ Name & Email required");
+    return;
+  }
+
+  const student = {
+    name: nameVal,
+    email: emailVal,
+    age: parseInt(ageVal) || 0,
+    department: deptVal
+  };
+
+  console.log("Sending:", student); // DEBUG
+
+  try {
+    const res = await fetch("http://localhost:8080/students", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(student)
+    });
+
+    const text = await res.text();
+    console.log("Response:", text);
+
+    if (!res.ok) {
+      throw new Error(text);
+    }
+
+    alert("✅ Student Added");
+
+  } catch (err) {
+    alert("❌ " + err.message);
+  }
+}
+
+// ✅ DELETE STUDENT
+async function deleteStudent() {
+  const id = delStudentId.value;
+
+  try {
+    const res = await fetch(`${BASE_URL}/students/${id}`, { method: "DELETE" });
+
+    if (!res.ok) throw new Error("Delete failed");
+
+    alert("Deleted");
+    loadStudents();
+
+  } catch (err) {
+    alert("❌ " + err.message);
+  }
+}
+
+// ✅ ADD COURSE
+async function addCourse() {
+  try {
+    const res = await fetch(`${BASE_URL}/courses`, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        title: title.value,
+        description: desc.value
+      })
+    });
+
+    if (!res.ok) throw new Error("Failed");
+
+    alert("Course Added");
+
+  } catch (err) {
+    alert("❌ " + err.message);
+  }
+}
+
+// ✅ DELETE COURSE
+async function deleteCourse() {
+  try {
+    const res = await fetch(`${BASE_URL}/courses/${delCourseId.value}`, {
+      method: "DELETE"
+    });
+
+    if (!res.ok) throw new Error("Delete failed");
+
+    alert("Deleted");
+    loadCourses();
+
+  } catch (err) {
+    alert("❌ " + err.message);
+  }
+}
+
+// ✅ ASSIGN
+async function assign() {
+  try {
+    const res = await fetch(`${BASE_URL}/students/${sid.value}/courses/${cid.value}`, {
+      method: "POST"
+    });
+
+    if (!res.ok) throw new Error("Invalid ID");
+
+    alert("Assigned");
+
+    // 🔥 DELAY FIX (UI update)
+    setTimeout(() => {
+      loadStudents();
+      loadCourses();
+    }, 300);
+
+  } catch (err) {
+    alert("❌ " + err.message);
+  }
+}
+// VIEW
+async function loadStudents() {
+  const res = await fetch(`${BASE_URL}/students`);
+  const data = await res.json();
+
+  console.log("STUDENTS:", data); // 🔥 DEBUG
+
+  studentCourses.innerHTML = "";
+
+  data.forEach(s => {
+    const li = document.createElement("li");
+
+    // 🔥 fallback fix
+    const name = s.name || s.username || "Unknown";
+
+    const courses = s.courses && s.courses.length > 0
+      ? s.courses.map(c => c.title).join(", ")
+      : "No course";
+
+    li.innerText = `${name} → ${courses}`;
+
+    studentCourses.appendChild(li);
+  });
+}
+async function loadCourses() {
+  const res = await fetch(`${BASE_URL}/courses`);
+  const data = await res.json();
+
+  console.log("COURSES:", data); // 🔥 DEBUG
+
+  courseStudents.innerHTML = "";
+
+  data.forEach(c => {
+    const li = document.createElement("li");
+
+    const students = c.students && c.students.length > 0
+      ? c.students.map(s => s.name || s.username).join(", ")
+      : "No student";
+
+    li.innerText = `${c.title} → ${students}`;
+
+    courseStudents.appendChild(li);
+  });
+}
+
+async function populateStudentEmailList() {
+  try {
+    const res = await fetch(`${BASE_URL}/students`);
+    if (!res.ok) return;
+    const students = await res.json();
+    studentEmails.innerHTML = "";
+    students.forEach(s => {
+      const option = document.createElement("option");
+      option.value = s.email;
+      studentEmails.appendChild(option);
+    });
+  } catch (err) {
+    console.warn("Unable to load student emails", err);
+  }
+}
+
+window.addEventListener("DOMContentLoaded", populateStudentEmailList);
+</script>
+
+</body>
+</html>

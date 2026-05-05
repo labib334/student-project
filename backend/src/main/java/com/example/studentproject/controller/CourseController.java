@@ -26,4 +26,9 @@ public class CourseController {
     public List<Course> getAll() {
         return service.getAll();
     }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        service.delete(id);
+    }
 }

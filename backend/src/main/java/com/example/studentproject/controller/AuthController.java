@@ -20,8 +20,9 @@ public class AuthController {
         return service.register(user);
     }
 
-    @PostMapping("/login")
-    public User login(@RequestBody User user) {
-        return service.login(user.getUsername(), user.getPassword());
-    }
+@PostMapping("/login")
+public User login(@RequestBody User user) {
+    return service.loginByEmail(user.getEmail(), user.getPassword());
+}
+    
 }

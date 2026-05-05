@@ -11,30 +11,43 @@ import java.util.List;
 @CrossOrigin("*")
 public class StudentController {
 
-    private final StudentService studentService;
+    private final StudentService service;
 
-    public StudentController(StudentService studentService) {
-        this.studentService = studentService;
+    public StudentController(StudentService service) {
+        this.service = service;
     }
 
-    // ✅ Create student
-    @PostMapping
-    public Student createStudent(@RequestBody Student student) {
-        return studentService.create(student);
-    }
-
-    // ✅ Get all students
     @GetMapping
-    public List<Student> getAllStudents() {
-        return studentService.getAll();
+    public List<Student> getAll() {
+        return service.getAll();
     }
 
-    // ✅ Assign course to student
-    @PostMapping("/{studentId}/courses/{courseId}")
-    public Student assignCourse(
-            @PathVariable Long studentId,
-            @PathVariable Long courseId
-    ) {
-        return studentService.assign(studentId, courseId);
+    @GetMapping("/my")
+    public Student getByEmail(@RequestParam String email) {
+        Student student = service.getByEmail(email);
+        if (student == null) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.NOT_FOUND,
+                    "Student not found"
+            );
+        }
+        return student;
+    }
+
+    // 🔥 ADD STUDENT
+    @PostMapping
+    public Student create(@RequestBody Student student) {
+        return service.create(student);
+    }
+
+    // 🔥 ASSIGN COURSE
+    @PostMapping("/{sid}/courses/{cid}")
+    public Student assign(@PathVariable Long sid, @PathVariable Long cid) {
+        return service.assign(sid, cid);
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        service.delete(id);
     }
 }
