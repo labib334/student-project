@@ -2,136 +2,191 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Student System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student System | Login</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
 <style>
-body {
-  background: linear-gradient(135deg, #0f172a, #1e3a8a, #2563eb);
-  background-size: 300% 300%;
-  animation: gradient 10s ease infinite;
-}
-@keyframes gradient {
-  0% {background-position: 0% 50%;}
-  50% {background-position: 100% 50%;}
-  100% {background-position: 0% 50%;}
-}
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
 
-.glass {
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.15);
-}
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: #0f172a;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    overflow: hidden;
+  }
 
-.input-group {
-  position: relative;
-}
-.input-group input {
-  width: 100%;
-  padding: 12px;
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.3);
-  border-radius: 10px;
-  color: white;
-}
-.input-group label {
-  position: absolute;
-  left: 12px;
-  top: 12px;
-  color: #ddd;
-  transition: 0.3s;
-}
-.input-group input:focus + label,
-.input-group input:not(:placeholder-shown) + label {
-  top: -8px;
-  font-size: 12px;
-  background: #0ea5e9;
-  padding: 0 5px;
-}
+  .blob {
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.3) 0%, rgba(147, 51, 234, 0.3) 100%);
+    filter: blur(80px);
+    border-radius: 50%;
+    z-index: -1;
+    animation: move 25s infinite alternate;
+  }
 
-.btn {
-  background: linear-gradient(135deg, #38bdf8, #6366f1);
-  color: white;
-}
+  @keyframes move {
+    from { transform: translate(-10%, -10%); }
+    to { transform: translate(10%, 10%); }
+  }
 
-.active-tab {
-  background: linear-gradient(135deg,#38bdf8,#6366f1);
-}
+  .glass {
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 420px;
+    border-radius: 2rem;
+  }
+
+  /* Simple Input Style - Fixed Overlap */
+  .field-container {
+    margin-bottom: 1.25rem;
+  }
+
+  .field-container label {
+    display: block;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    margin-bottom: 0.5rem;
+    margin-left: 0.25rem;
+  }
+
+  .input-style {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: white;
+    transition: all 0.3s ease;
+    outline: none;
+  }
+
+  .input-style:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.1);
+    box-shadow: 0 10px 20px -5px rgba(56, 189, 248, 0.4);
+  }
+
+  .tab-btn {
+    transition: all 0.3s ease;
+    color: #94a3b8;
+  }
+
+  .tab-btn.active-tab {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
 </style>
 </head>
 
-<body class="h-screen flex items-center justify-center">
+<body>
 
-<div class="glass p-10 rounded-3xl w-96 text-gray-100">
+<div class="blob" style="top: -10%; left: -10%;"></div>
+<div class="blob" style="bottom: -10%; right: -10%;"></div>
 
-<h2 class="text-3xl text-center mb-6">🎓 Student System</h2>
-
-<div class="flex mb-6 bg-white/20 rounded-xl overflow-hidden">
-  <button onclick="showLogin()" id="loginTab" class="w-1/2 py-2 active-tab">Login</button>
-  <button onclick="showRegister()" id="registerTab" class="w-1/2 py-2">Register</button>
-</div>
-
-<!-- LOGIN -->
-<div id="loginForm">
-  <div class="input-group mb-4">
-    <input id="lemail" placeholder=" ">
-    <label>Email</label>
+<div class="glass p-8 md:p-10 text-gray-100">
+  
+  <div class="text-center mb-8">
+    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-sky-500/10 mb-4">
+        <i class="fas fa-graduation-cap text-3xl text-sky-400"></i>
+    </div>
+    <h2 class="text-2xl font-bold">Student Portal</h2>
+    <p class="text-slate-400 text-sm mt-1">Access your academic dashboard</p>
   </div>
 
-  <div class="input-group mb-5">
-    <input id="lpass" type="password" placeholder=" ">
-    <label>Password</label>
+  <div class="flex p-1 mb-8 bg-black/20 rounded-xl">
+    <button onclick="showLogin()" id="loginTab" class="w-1/2 py-2 rounded-lg font-semibold tab-btn active-tab">Login</button>
+    <button onclick="showRegister()" id="registerTab" class="w-1/2 py-2 rounded-lg font-semibold tab-btn">Register</button>
   </div>
 
-  <button onclick="login()" class="btn w-full py-2 rounded">Login</button>
-</div>
+  <!-- LOGIN FORM -->
+  <div id="loginForm" class="space-y-4">
+    <div class="field-container">
+      <label><i class="fas fa-envelope mr-1"></i> Email Address</label>
+      <input id="lemail" class="input-style" type="email" placeholder="e.g. name@student.com">
+    </div>
 
-<!-- REGISTER -->
-<div id="registerForm" class="hidden">
+    <div class="field-container">
+      <label><i class="fas fa-lock mr-1"></i> Password</label>
+      <input id="lpass" class="input-style" type="password" placeholder="Enter your password">
+    </div>
 
-  <div class="input-group mb-4">
-    <input id="ruser" placeholder=" ">
-    <label>Username</label>
+    <button onclick="login()" class="btn-primary w-full py-3 rounded-xl font-bold mt-2">
+      Sign In <i class="fas fa-sign-in-alt ml-2"></i>
+    </button>
   </div>
 
-  <div class="input-group mb-4">
-    <input id="remail" placeholder=" ">
-    <label>Email</label>
+  <!-- REGISTER FORM -->
+  <div id="registerForm" class="hidden space-y-4">
+    <div class="field-container">
+      <label><i class="fas fa-user mr-1"></i> Username</label>
+      <input id="ruser" class="input-style" type="text" placeholder="Choose a username">
+    </div>
+
+    <div class="field-container">
+      <label><i class="fas fa-envelope mr-1"></i> Email Address</label>
+      <input id="remail" class="input-style" type="email" placeholder="e.g. student@mail.com">
+    </div>
+
+    <div class="field-container">
+      <label><i class="fas fa-lock mr-1"></i> Password</label>
+      <input id="rpass" class="input-style" type="password" placeholder="Create a strong password">
+    </div>
+
+    <button onclick="register()" class="btn-primary w-full py-3 rounded-xl font-bold mt-2">
+      Create Account <i class="fas fa-user-plus ml-2"></i>
+    </button>
   </div>
 
-  <div class="input-group mb-5">
-    <input id="rpass" type="password" placeholder=" ">
-    <label>Password</label>
-  </div>
-
-  <button onclick="register()" class="btn w-full py-2 rounded">Register</button>
-</div>
-
-<p id="msg" class="text-center mt-4"></p>
+  <p id="msg" class="text-center mt-6 min-h-[20px] text-sm font-medium"></p>
 
 </div>
 
 <script>
 const BASE_URL = "http://localhost:8080";
 
-// TAB SWITCH
 function showLogin() {
-  loginForm.classList.remove("hidden");
-  registerForm.classList.add("hidden");
-  loginTab.classList.add("active-tab");
-  registerTab.classList.remove("active-tab");
+  document.getElementById("loginForm").classList.remove("hidden");
+  document.getElementById("registerForm").classList.add("hidden");
+  document.getElementById("loginTab").classList.add("active-tab");
+  document.getElementById("registerTab").classList.remove("active-tab");
+  document.getElementById("msg").innerText = "";
 }
 
 function showRegister() {
-  loginForm.classList.add("hidden");
-  registerForm.classList.remove("hidden");
-  loginTab.classList.remove("active-tab");
-  registerTab.classList.add("active-tab");
+  document.getElementById("loginForm").classList.add("hidden");
+  document.getElementById("registerForm").classList.remove("hidden");
+  document.getElementById("loginTab").classList.remove("active-tab");
+  document.getElementById("registerTab").classList.add("active-tab");
+  document.getElementById("msg").innerText = "";
 }
 
-// REGISTER
+// Logic unchanged as requested
 async function register() {
+  const msg = document.getElementById("msg");
   try {
+    msg.innerHTML = "Processing...";
     const res = await fetch(`${BASE_URL}/auth/register`, {
       method: "POST",
       headers: {"Content-Type":"application/json"},
@@ -141,20 +196,20 @@ async function register() {
         email: remail.value
       })
     });
-
     if (!res.ok) throw new Error(await res.text());
-
+    msg.className = "text-center mt-6 text-emerald-400";
     msg.innerText = "✅ Registered successfully";
-    showLogin();
-
+    setTimeout(() => showLogin(), 1500);
   } catch (err) {
+    msg.className = "text-center mt-6 text-rose-400";
     msg.innerText = "❌ " + err.message;
   }
 }
 
-// LOGIN (EMAIL BASED)
 async function login() {
+  const msg = document.getElementById("msg");
   try {
+    msg.innerHTML = "Authenticating...";
     const res = await fetch(`${BASE_URL}/auth/login`, {
       method: "POST",
       headers: {"Content-Type":"application/json"},
@@ -163,19 +218,16 @@ async function login() {
         password: lpass.value
       })
     });
-
     if (!res.ok) throw new Error(await res.text());
-
     const user = await res.json();
-
     if (user.role === "ADMIN") {
       window.location.href = "admin.html";
     } else {
       localStorage.setItem("email", user.email);
       window.location.href = "user.html";
     }
-
   } catch (err) {
+    msg.className = "text-center mt-6 text-rose-400";
     msg.innerText = "❌ " + err.message;
   }
 }

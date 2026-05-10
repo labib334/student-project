@@ -18,7 +18,6 @@
 
 <body class="bg-[#f8fafc] flex min-h-screen">
 
-<!-- SIDEBAR -->
 <aside class="w-72 bg-white border-r border-gray-200 flex flex-col sticky top-0 h-screen">
     <div class="p-8">
         <h2 class="text-2xl font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent flex items-center gap-2">
@@ -39,6 +38,10 @@
         <button onclick="show('assign')" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-all">
             <i class="fas fa-link"></i> Assign
         </button>
+
+        <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 text-red-500 font-medium rounded-lg hover:bg-red-50 transition-all mt-4 border-t border-gray-100 pt-4">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
     </nav>
 
     <div class="p-6 border-t border-gray-100">
@@ -49,10 +52,8 @@
     </div>
 </aside>
 
-<!-- MAIN CONTENT -->
 <main class="flex-1 flex flex-col overflow-hidden">
     
-    <!-- TOP HEADER -->
     <header class="h-20 bg-white/80 backdrop-blur-md border-b border-gray-200 px-8 flex items-center justify-between sticky top-0 z-10">
         <h1 id="page-title" class="text-xl font-bold text-gray-800">Overview</h1>
         <div class="flex items-center gap-4">
@@ -64,13 +65,11 @@
 
     <div class="p-8 overflow-y-auto custom-scrollbar">
 
-        <!-- DASHBOARD SECTION -->
         <div id="dashboard" class="space-y-8 animate-in fade-in duration-500">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Student View -->
                 <div class="glass-card rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-lg font-bold text-gray-800">Student &rarr; Enrolled Courses</h2>
+                        <h2 class="text-lg font-bold text-gray-800">Student Enrolled Courses</h2>
                         <button onclick="loadStudents()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all">
                             <i class="fas fa-sync-alt"></i> Refresh
                         </button>
@@ -80,10 +79,9 @@
                     </ul>
                 </div>
 
-                <!-- Course View -->
                 <div class="glass-card rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-lg font-bold text-gray-800">Course &rarr; Enrolled Students</h2>
+                        <h2 class="text-lg font-bold text-gray-800">Course Enrolled Students</h2>
                         <button onclick="loadCourses()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all">
                             <i class="fas fa-sync-alt"></i> Refresh
                         </button>
@@ -95,9 +93,8 @@
             </div>
         </div>
 
-        <!-- STUDENTS SECTION -->
         <div id="students" class="hidden space-y-8 animate-in slide-in-from-bottom-4 duration-500">
-            <div class="max-w-3xl">
+            <div class="max-w-3xl mx-auto"> 
                 <div class="glass-card rounded-2xl shadow-sm p-8 mb-8">
                     <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
                         <i class="fas fa-user-plus text-blue-500"></i> Register New Student
@@ -107,7 +104,7 @@
                         <input id="email" list="studentEmails" placeholder="Email Address" class="border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50 transition-all">
                         <datalist id="studentEmails"></datalist>
                         <input id="age" type="number" placeholder="Age" class="border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50 transition-all">
-                        <input id="dept" placeholder="Department (e.g. CSE)" class="border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50 transition-all">
+                        <input id="dept" placeholder="Department" class="border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50 transition-all">
                     </div>
                     <button onclick="addStudent()" class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-200 transition-all">
                         Complete Registration
@@ -124,9 +121,8 @@
             </div>
         </div>
 
-        <!-- COURSES SECTION -->
         <div id="courses" class="hidden space-y-8 animate-in slide-in-from-bottom-4 duration-500">
-            <div class="max-w-3xl">
+            <div class="max-w-3xl mx-auto">
                 <div class="glass-card rounded-2xl shadow-sm p-8 mb-8">
                     <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
                         <i class="fas fa-book-medical text-indigo-500"></i> Create New Course
@@ -150,7 +146,6 @@
             </div>
         </div>
 
-        <!-- ASSIGN SECTION -->
         <div id="assign" class="hidden space-y-8 animate-in slide-in-from-bottom-4 duration-500">
             <div class="max-w-2xl mx-auto mt-12">
                 <div class="glass-card rounded-3xl shadow-xl p-10 text-center border-2 border-dashed border-purple-100">
@@ -187,61 +182,44 @@
 <script>
 const BASE_URL = "http://localhost:8080";
 
+// ✅ LOGOUT FUNCTION
+function logout() {
+  localStorage.removeItem("email");
+  window.location.href = "login.html";
+}
+
 function show(section) {
   ["dashboard","students","courses","assign"].forEach(id => {
     document.getElementById(id).classList.add("hidden");
   });
   document.getElementById(section).classList.remove("hidden");
   
-  // UI logic for title and sidebar state
   const titles = { 'dashboard': 'Overview', 'students': 'Student Management', 'courses': 'Course Catalog', 'assign': 'Course Enrollment' };
   document.getElementById('page-title').innerText = titles[section];
   
-  // Highlight active sidebar link
   document.querySelectorAll('.sidebar-link').forEach(btn => {
       btn.classList.remove('active');
       if(btn.innerText.toLowerCase().includes(section)) btn.classList.add('active');
   });
 }
 
-// Initial active state
 document.addEventListener('DOMContentLoaded', () => show('dashboard'));
 
-// ✅ ADD STUDENT
 async function addStudent() {
   const nameVal = document.getElementById("name").value.trim();
   const emailVal = document.getElementById("email").value.trim();
   const ageVal = document.getElementById("age").value;
   const deptVal = document.getElementById("dept").value.trim();
-
-  if (!nameVal || !emailVal) {
-    alert("❌ Name & Email required");
-    return;
-  }
-
-  const student = {
-    name: nameVal,
-    email: emailVal,
-    age: parseInt(ageVal) || 0,
-    department: deptVal
-  };
-
+  if (!nameVal || !emailVal) { alert("❌ Name & Email required"); return; }
+  const student = { name: nameVal, email: emailVal, age: parseInt(ageVal) || 0, department: deptVal };
   try {
-    const res = await fetch(`${BASE_URL}/students`, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify(student)
-    });
-
+    const res = await fetch(`${BASE_URL}/students`, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(student) });
     const text = await res.text();
     if (!res.ok) throw new Error(text);
     alert("✅ Student Added Successfully");
-  } catch (err) {
-    alert("❌ Error: " + err.message);
-  }
+  } catch (err) { alert("❌ Error: " + err.message); }
 }
 
-// ✅ DELETE STUDENT
 async function deleteStudent() {
   const id = delStudentId.value;
   if(!id) return alert("Enter Student ID");
@@ -250,30 +228,17 @@ async function deleteStudent() {
     if (!res.ok) throw new Error("Delete failed");
     alert("✅ Student Deleted");
     loadStudents();
-  } catch (err) {
-    alert("❌ " + err.message);
-  }
+  } catch (err) { alert("❌ " + err.message); }
 }
 
-// ✅ ADD COURSE
 async function addCourse() {
   try {
-    const res = await fetch(`${BASE_URL}/courses`, {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({
-        title: title.value,
-        description: desc.value
-      })
-    });
+    const res = await fetch(`${BASE_URL}/courses`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ title: title.value, description: desc.value }) });
     if (!res.ok) throw new Error("Failed");
     alert("✅ Course Added Successfully");
-  } catch (err) {
-    alert("❌ " + err.message);
-  }
+  } catch (err) { alert("❌ " + err.message); }
 }
 
-// ✅ DELETE COURSE
 async function deleteCourse() {
   const id = delCourseId.value;
   if(!id) return alert("Enter Course ID");
@@ -282,50 +247,31 @@ async function deleteCourse() {
     if (!res.ok) throw new Error("Delete failed");
     alert("✅ Course Deleted");
     loadCourses();
-  } catch (err) {
-    alert("❌ " + err.message);
-  }
+  } catch (err) { alert("❌ " + err.message); }
 }
 
-// ✅ ASSIGN
 async function assign() {
   try {
-    const res = await fetch(`${BASE_URL}/students/${sid.value}/courses/${cid.value}`, {
-      method: "POST"
-    });
+    const res = await fetch(`${BASE_URL}/students/${sid.value}/courses/${cid.value}`, { method: "POST" });
     if (!res.ok) throw new Error("Invalid Student or Course ID");
     alert("✅ Enrollment Successful");
     setTimeout(() => { loadStudents(); loadCourses(); }, 300);
-  } catch (err) {
-    alert("❌ " + err.message);
-  }
+  } catch (err) { alert("❌ " + err.message); }
 }
 
-// VIEW HANDLERS (Improved styling for list items)
 async function loadStudents() {
   const container = document.getElementById("studentCourses");
   container.innerHTML = `<div class="flex justify-center p-4"><i class="fas fa-spinner fa-spin text-blue-500"></i></div>`;
-  
   try {
     const res = await fetch(`${BASE_URL}/students`);
     const data = await res.json();
     container.innerHTML = "";
-
     data.forEach(s => {
       const name = s.name || s.username || "Unknown";
-      const courses = s.courses && s.courses.length > 0
-        ? s.courses.map(c => `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">${c.title}</span>`).join(" ")
-        : "<span class='text-gray-400'>No courses</span>";
-
+      const courses = s.courses && s.courses.length > 0 ? s.courses.map(c => `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">${c.title}</span>`).join(" ") : "<span class='text-gray-400'>No courses</span>";
       const li = document.createElement("li");
       li.className = "bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col gap-2";
-      li.innerHTML = `
-        <div class="flex justify-between items-center">
-            <span class="font-bold text-gray-700">${name}</span>
-            <span class="text-[10px] text-gray-400 font-mono">ID: ${s.id || 'N/A'}</span>
-        </div>
-        <div class="flex flex-wrap gap-1">${courses}</div>
-      `;
+      li.innerHTML = `<div class="flex justify-between items-center"><span class="font-bold text-gray-700">${name}</span><span class="text-[10px] text-gray-400 font-mono">ID: ${s.id || 'N/A'}</span></div><div class="flex flex-wrap gap-1">${courses}</div>`;
       container.appendChild(li);
     });
   } catch (e) { container.innerHTML = "Error loading students"; }
@@ -334,26 +280,15 @@ async function loadStudents() {
 async function loadCourses() {
   const container = document.getElementById("courseStudents");
   container.innerHTML = `<div class="flex justify-center p-4"><i class="fas fa-spinner fa-spin text-indigo-500"></i></div>`;
-
   try {
     const res = await fetch(`${BASE_URL}/courses`);
     const data = await res.json();
     container.innerHTML = "";
-
     data.forEach(c => {
-      const students = c.students && c.students.length > 0
-        ? c.students.map(s => `<span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-xs font-bold">${s.name || s.username}</span>`).join(" ")
-        : "<span class='text-gray-400'>No students enrolled</span>";
-
+      const students = c.students && c.students.length > 0 ? c.students.map(s => `<span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-xs font-bold">${s.name || s.username}</span>`).join(" ") : "<span class='text-gray-400'>No students enrolled</span>";
       const li = document.createElement("li");
       li.className = "bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col gap-2";
-      li.innerHTML = `
-        <div class="flex justify-between items-center">
-            <span class="font-bold text-gray-700">${c.title}</span>
-            <span class="text-[10px] text-gray-400 font-mono">ID: ${c.id || 'N/A'}</span>
-        </div>
-        <div class="flex flex-wrap gap-1">${students}</div>
-      `;
+      li.innerHTML = `<div class="flex justify-between items-center"><span class="font-bold text-gray-700">${c.title}</span><span class="text-[10px] text-gray-400 font-mono">ID: ${c.id || 'N/A'}</span></div><div class="flex flex-wrap gap-1">${students}</div>`;
       container.appendChild(li);
     });
   } catch (e) { container.innerHTML = "Error loading courses"; }
@@ -361,10 +296,7 @@ async function loadCourses() {
 
 async function populateStudentEmailList() {
   try {
-    const [studentsRes, usersRes] = await Promise.all([
-      fetch(`${BASE_URL}/students`),
-      fetch(`${BASE_URL}/auth/emails`)
-    ]);
+    const [studentsRes, usersRes] = await Promise.all([ fetch(`${BASE_URL}/students`), fetch(`${BASE_URL}/auth/emails`) ]);
     const students = studentsRes.ok ? await studentsRes.json() : [];
     const userEmails = usersRes.ok ? await usersRes.json() : [];
     const emailSet = new Set();
@@ -372,14 +304,9 @@ async function populateStudentEmailList() {
     userEmails.forEach(email => email && emailSet.add(email));
     const dl = document.getElementById("studentEmails");
     dl.innerHTML = "";
-    emailSet.forEach(email => {
-      const option = document.createElement("option");
-      option.value = email;
-      dl.appendChild(option);
-    });
+    emailSet.forEach(email => { const option = document.createElement("option"); option.value = email; dl.appendChild(option); });
   } catch (err) { console.warn("Unable to load student emails", err); }
 }
-
 window.addEventListener("DOMContentLoaded", populateStudentEmailList);
 </script>
 
