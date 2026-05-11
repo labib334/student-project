@@ -27,7 +27,27 @@ public class UserService {
 
         user.setRole("USER");
 
-        return userRepo.save(user);
+        User savedUser = userRepo.save(user);
+
+        // 🔥 Create/Update student record with name, age, department
+        if ("USER".equals(user.getRole())) {
+            Student existing = studentRepo.findFirstByEmail(user.getEmail());
+            if (existing != null) {
+                existing.setName(user.getName());
+                existing.setAge(user.getAge());
+                existing.setDepartment(user.getDepartment());
+                studentRepo.save(existing);
+            } else {
+                Student s = new Student();
+                s.setName(user.getName());
+                s.setEmail(user.getEmail());
+                s.setAge(user.getAge());
+                s.setDepartment(user.getDepartment() != null ? user.getDepartment() : "Not Set");
+                studentRepo.save(s);
+            }
+        }
+
+        return savedUser;
     }
 
     public User loginByEmail(String email, String password) {

@@ -140,8 +140,8 @@
   <!-- REGISTER FORM -->
   <div id="registerForm" class="hidden space-y-4">
     <div class="field-container">
-      <label><i class="fas fa-user mr-1"></i> Username</label>
-      <input id="ruser" class="input-style" type="text" placeholder="Choose a username">
+      <label><i class="fas fa-user mr-1"></i> Full Name</label>
+      <input id="rname" class="input-style" type="text" placeholder="Enter your full name">
     </div>
 
     <div class="field-container">
@@ -152,6 +152,16 @@
     <div class="field-container">
       <label><i class="fas fa-lock mr-1"></i> Password</label>
       <input id="rpass" class="input-style" type="password" placeholder="Create a strong password">
+    </div>
+
+    <div class="field-container">
+      <label><i class="fas fa-birthday-cake mr-1"></i> Age</label>
+      <input id="rage" class="input-style" type="number" placeholder="Your age" min="15" max="70">
+    </div>
+
+    <div class="field-container">
+      <label><i class="fas fa-building mr-1"></i> Department</label>
+      <input id="rdept" class="input-style" type="text" placeholder="e.g. Computer Science, Engineering">
     </div>
 
     <button onclick="register()" class="btn-primary w-full py-3 rounded-xl font-bold mt-2">
@@ -187,13 +197,23 @@ async function register() {
   const msg = document.getElementById("msg");
   try {
     msg.innerHTML = "Processing...";
+    
+    // Validate inputs
+    if (!rname.value.trim() || !remail.value.trim() || !rpass.value.trim() || !rage.value || !rdept.value.trim()) {
+      msg.className = "text-center mt-6 text-rose-400";
+      msg.innerText = "❌ All fields are required";
+      return;
+    }
+    
     const res = await fetch(`${BASE_URL}/auth/register`, {
       method: "POST",
       headers: {"Content-Type":"application/json"},
       body: JSON.stringify({
-        username: ruser.value,
+        name: rname.value.trim(),
+        email: remail.value.trim(),
         password: rpass.value,
-        email: remail.value
+        age: parseInt(rage.value),
+        department: rdept.value.trim()
       })
     });
     if (!res.ok) throw new Error(await res.text());
