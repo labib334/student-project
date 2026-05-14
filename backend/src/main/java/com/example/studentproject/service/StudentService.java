@@ -4,7 +4,9 @@ import com.example.studentproject.entity.Course;
 import com.example.studentproject.entity.Student;
 import com.example.studentproject.repository.CourseRepository;
 import com.example.studentproject.repository.StudentRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashSet;
 import java.util.List;
@@ -41,6 +43,11 @@ public class StudentService {
         return studentRepo.findFirstByEmail(email);
     }
 
+    public Student getById(Long id) {
+        return studentRepo.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
+    }
+
     public Student assign(Long sid, Long cid) {
 
         Student student = studentRepo.findById(sid).orElseThrow();
@@ -48,6 +55,12 @@ public class StudentService {
 
         if (student.getCourses() == null) {
             student.setCourses(new HashSet<>());
+        }
+
+        boolean alreadyAssigned = student.getCourses().stream()
+                .anyMatch(c -> c.getId() != null && c.getId().equals(course.getId()));
+        if (alreadyAssigned) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Student is already assigned to this course");
         }
 
         student.getCourses().add(course);

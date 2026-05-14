@@ -171,27 +171,31 @@
                     
                     <div class="space-y-4 max-w-xs mx-auto">
                         <div class="text-left">
-                            <label class="text-xs font-bold text-gray-400 uppercase ml-1">Student Email - Select</label>
-                            <select id="studentSelect" class="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none bg-white transition-all" onchange="onStudentSelected()">
+                            <label class="text-xs font-bold text-gray-400 uppercase ml-1">Search Student By</label>
+                            <select id="searchMode" class="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none bg-white transition-all" onchange="onSearchModeChange()">
+                                <option value="email">Email</option>
+                                <option value="id">Student ID</option>
+                            </select>
+                        </div>
+
+                        <div id="emailSearchArea" class="text-left">
+                            <label class="text-xs font-bold text-gray-400 uppercase ml-1">Student Email</label>
+                            <select id="studentSelect" class="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none bg-white transition-all" onchange="onStudentSelectionChange()">
                                 <option value="">Choose a student email</option>
                             </select>
                         </div>
 
-                        <div class="flex items-center gap-2">
-                            <div class="flex-1 h-px bg-gray-200"></div>
-                            <span class="text-gray-400 text-xs font-semibold">OR</span>
-                            <div class="flex-1 h-px bg-gray-200"></div>
+                        <div id="idSearchArea" class="text-left hidden">
+                            <label class="text-xs font-bold text-gray-400 uppercase ml-1">Student ID</label>
+                            <input id="studentIdInput" type="text" placeholder="Enter student ID" class="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none bg-gray-50 transition-all" oninput="onStudentIdInput()">
                         </div>
 
-                        <div class="text-left">
-                            <label class="text-xs font-bold text-gray-400 uppercase ml-1">Student Email - Search</label>
-                            <input id="emailSearch" type="text" placeholder="Type email to search (e.g. john@)" class="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none bg-gray-50 transition-all" oninput="onEmailSearchInput()">
-                            <div id="searchResults" class="mt-2 space-y-1 max-h-40 overflow-y-auto"></div>
+                        <div id="selectedStudentInfo" class="hidden rounded-2xl border border-gray-200 bg-white p-4 text-left">
+                            <div id="selectedStudentLabel" class="text-sm font-semibold text-purple-700 mb-3">No student chosen yet.</div>
+                            <div class="text-xs font-semibold uppercase text-gray-400 mb-2">Current Enrolled Courses</div>
+                            <div id="currentCourses" class="min-h-[3rem] text-sm text-gray-600">No student selected yet.</div>
                         </div>
 
-                        <div class="text-left text-center">
-                            <i class="fas fa-arrow-down text-gray-300"></i>
-                        </div>
                         <div class="text-left">
                             <label class="text-xs font-bold text-gray-400 uppercase ml-1">Course</label>
                             <select id="courseSelect" class="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none bg-white transition-all">
@@ -292,6 +296,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   show('dashboard');
   await refreshAdminData();
   setupStudentEmailEvents();
+  setupAssignmentEvents();
 });
 
 let studentsCache = [];
@@ -327,6 +332,22 @@ function setupStudentEmailEvents() {
   }
 }
 
+function setupAssignmentEvents() {
+  const searchMode = document.getElementById("searchMode");
+  const studentSelect = document.getElementById("studentSelect");
+  const studentIdInput = document.getElementById("studentIdInput");
+
+  if (searchMode) {
+    searchMode.addEventListener("change", onSearchModeChange);
+  }
+  if (studentSelect) {
+    studentSelect.addEventListener("change", onStudentSelectionChange);
+  }
+  if (studentIdInput) {
+    studentIdInput.addEventListener("input", onStudentIdInput);
+  }
+}
+
 function fillStudentDetailsByEmail(email) {
   const found = studentsCache.find(s => s.email?.toLowerCase() === email.toLowerCase());
   const nameField = document.getElementById("name");
@@ -340,6 +361,79 @@ function fillStudentDetailsByEmail(email) {
   if (nameField) nameField.value = found.name || found.username || "";
   if (ageField) ageField.value = found.age || "";
   if (deptField) deptField.value = found.department || "";
+}
+
+function onSearchModeChange() {
+  const mode = document.getElementById("searchMode").value;
+  const emailArea = document.getElementById("emailSearchArea");
+  const idArea = document.getElementById("idSearchArea");
+  const studentSelect = document.getElementById("studentSelect");
+  const studentIdInput = document.getElementById("studentIdInput");
+
+  if (mode === "id") {
+    emailArea.classList.add("hidden");
+    idArea.classList.remove("hidden");
+    if (studentSelect) studentSelect.value = "";
+    if (studentIdInput) studentIdInput.value = "";
+  } else {
+    idArea.classList.add("hidden");
+    emailArea.classList.remove("hidden");
+    if (studentIdInput) studentIdInput.value = "";
+    if (studentSelect) studentSelect.value = "";
+  }
+  clearSelectedStudentInfo();
+}
+
+function onStudentSelectionChange() {
+  const studentId = document.getElementById("studentSelect").value;
+  if (!studentId) {
+    clearSelectedStudentInfo();
+    return;
+  }
+  updateSelectedStudentInfo(studentId);
+}
+
+async function onStudentIdInput() {
+  const studentId = document.getElementById("studentIdInput").value.trim();
+  if (!studentId) {
+    clearSelectedStudentInfo();
+    return;
+  }
+  updateSelectedStudentInfo(studentId);
+}
+
+function clearSelectedStudentInfo() {
+  const info = document.getElementById("selectedStudentInfo");
+  const label = document.getElementById("selectedStudentLabel");
+  const courses = document.getElementById("currentCourses");
+  if (info) info.classList.add("hidden");
+  if (label) label.innerText = "No student chosen yet.";
+  if (courses) courses.innerText = "No student selected yet.";
+}
+
+function updateSelectedStudentInfo(identifier) {
+  const student = studentsCache.find(s => String(s.id) === String(identifier));
+  const info = document.getElementById("selectedStudentInfo");
+  const label = document.getElementById("selectedStudentLabel");
+  const courses = document.getElementById("currentCourses");
+
+  if (!info || !label || !courses) return;
+  if (!student) {
+    info.classList.remove("hidden");
+    label.innerHTML = `<span class="text-red-500">Student ID ${identifier} not found.</span>`;
+    courses.innerText = "No enrollments available.";
+    return;
+  }
+
+  info.classList.remove("hidden");
+  label.innerText = `Email: ${student.email || 'N/A'} | ID: ${student.id}`;
+
+  if (!student.courses || student.courses.length === 0) {
+    courses.innerText = "No courses enrolled yet.";
+    return;
+  }
+
+  courses.innerHTML = student.courses.map(c => `<span class="inline-flex items-center gap-2 bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-xs font-semibold">${c.title || 'Course'} <span class="text-gray-400">(${c.id})</span></span>`).join(" ");
 }
 
 async function fetchStudents() {
@@ -365,7 +459,15 @@ async function fetchCourses() {
   }
   return coursesCache;
 }
-
+async function fetchStudentById(id) {
+  try {
+    const res = await fetch(`${BASE_URL}/students/${id}`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err) {
+    return null;
+  }
+}
 async function addStudent() {
   const nameVal = document.getElementById("name").value.trim();
   const emailVal = document.getElementById("email").value.trim();
@@ -414,15 +516,27 @@ async function deleteCourse() {
 }
 
 async function assign() {
-  const studentId = document.getElementById("studentSelect").value;
+  const mode = document.getElementById("searchMode").value;
   const courseId = document.getElementById("courseSelect").value;
-  if (!studentId || !courseId) return alert("Select student and course from the dropdowns");
+  const studentId = mode === "id" ? document.getElementById("studentIdInput").value.trim() : document.getElementById("studentSelect").value;
+
+  if (!studentId) return alert("Select a student or enter a student ID.");
+  if (!courseId) return alert("Select a course.");
+
+  const student = studentsCache.find(s => String(s.id) === String(studentId));
+  if (!student) return alert("Student not found. Please refresh and try again.");
+
+  if (student.courses && student.courses.some(c => String(c.id) === String(courseId))) {
+    return alert("⚠️ This student is already enrolled in the selected course.");
+  }
 
   try {
     const res = await fetch(`${BASE_URL}/students/${studentId}/courses/${courseId}`, { method: "POST" });
-    if (!res.ok) throw new Error("Invalid Student or Course ID");
+    const text = await res.text();
+    if (!res.ok) throw new Error(text || "Invalid Student or Course ID");
     alert("✅ Enrollment Successful");
-    setTimeout(() => { loadStudents(); loadCourses(); populateAssignmentDropdowns(); }, 300);
+    await refreshAdminData();
+    updateSelectedStudentInfo(studentId);
   } catch (err) { alert("❌ " + err.message); }
 }
 
@@ -759,54 +873,7 @@ function renderDepartmentBarChart(departments) {
   });
 }
 
-// 🔥 NEW: Email search functionality
-function onEmailSearchInput() {
-  const searchInput = document.getElementById("emailSearch");
-  const searchResults = document.getElementById("searchResults");
-  const query = searchInput.value.toLowerCase().trim();
-
-  searchResults.innerHTML = "";
-
-  if (query.length === 0) {
-    return;
-  }
-
-  const filtered = studentsCache.filter(s => 
-    s.email && s.email.toLowerCase().includes(query)
-  );
-
-  if (filtered.length === 0) {
-    searchResults.innerHTML = '<div class="text-gray-400 text-sm italic p-2">No results found</div>';
-    return;
-  }
-
-  filtered.slice(0, 5).forEach(student => {
-    const resultDiv = document.createElement("div");
-    resultDiv.className = "bg-purple-50 border border-purple-200 p-2 rounded cursor-pointer hover:bg-purple-100 transition-all text-left text-sm";
-    resultDiv.innerHTML = `
-      <div class="font-bold text-purple-700">${student.email}</div>
-      <div class="text-gray-600 text-xs">${student.name || "N/A"} | ${student.department || "N/A"}</div>
-    `;
-    resultDiv.onclick = () => selectStudentFromSearch(student);
-    searchResults.appendChild(resultDiv);
-  });
-}
-
-function selectStudentFromSearch(student) {
-  document.getElementById("studentSelect").value = student.id || "";
-  document.getElementById("emailSearch").value = "";
-  document.getElementById("searchResults").innerHTML = "";
-  onStudentSelected();
-}
-
-function onStudentSelected() {
-  const studentId = document.getElementById("studentSelect").value;
-  const student = studentsCache.find(s => s.id == studentId);
-  
-  if (student) {
-    document.getElementById("emailSearch").value = student.email;
-  }
-}</script>
+</script>
 
 </body>
 </html>

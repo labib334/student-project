@@ -34,6 +34,11 @@ public class StudentController {
         return student;
     }
 
+    @GetMapping("/{id}")
+    public Student getById(@PathVariable Long id) {
+        return service.getById(id);
+    }
+
     // 🔥 ADD STUDENT
     @PostMapping
     public Student create(@RequestBody Student student) {

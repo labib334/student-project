@@ -147,36 +147,98 @@ async function deleteCourse() {
 }
 
 async function assign() {
-  const studentId = document.getElementById("studentSelect").value;
+  const mode = document.getElementById("searchMode").value;
   const courseId = document.getElementById("courseSelect").value;
-  if (!studentId || !courseId) return alert("Select student and course from the dropdowns");
+  const studentId = mode === "id" ? document.getElementById("studentIdInput").value.trim() : document.getElementById("studentSelect").value;
+
+  if (!studentId) return alert("Select a student or enter a student ID.");
+  if (!courseId) return alert("Select a course.");
+
+  const student = studentsCache.find(s => String(s.id) === String(studentId));
+  if (!student) return alert("Student not found. Please refresh and try again.");
+
+  if (student.courses && student.courses.some(c => String(c.id) === String(courseId))) {
+    return alert("⚠️ This student is already enrolled in the selected course.");
+  }
 
   try {
     const res = await fetch(`${BASE_URL}/students/${studentId}/courses/${courseId}`, { method: "POST" });
-    if (!res.ok) throw new Error("Invalid Student or Course ID");
+    const text = await res.text();
+    if (!res.ok) throw new Error(text || "Invalid Student or Course ID");
     alert("✅ Enrollment Successful");
-    setTimeout(() => { loadStudents(); loadCourses(); populateAssignmentDropdowns(); }, 300);
+    await refreshAdminData();
+    updateSelectedStudentEnrollments(studentId);
   } catch (err) { alert("❌ " + err.message); }
 }
 
-async function loadStudents() {
-  const container = document.getElementById("studentCourses");
-  container.innerHTML = `<div class="flex justify-center p-4"><i class="fas fa-spinner fa-spin text-blue-500"></i></div>`;
-  try {
-    const data = await fetchStudents();
-    container.innerHTML = "";
-    data.forEach(s => {
-      const name = s.name || s.username || "Unknown";
-      const courses = s.courses && s.courses.length > 0 ? s.courses.map(c => `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">${c.title}</span>`).join(" ") : "<span class='text-gray-400'>No courses</span>";
-      const li = document.createElement("li");
-      li.className = "bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col gap-2";
-      li.innerHTML = `<div class="flex justify-between items-center"><span class="font-bold text-gray-700">${name}</span><span class="text-[10px] text-gray-400 font-mono">ID: ${s.id || 'N/A'}</span></div><div class="flex flex-wrap gap-1">${courses}</div>`;
-      container.appendChild(li);
-    });
-  } catch (e) { container.innerHTML = "Error loading students"; }
+function onSearchModeChange() {
+  const mode = document.getElementById("searchMode").value;
+  const emailArea = document.getElementById("emailSearchArea");
+  const idArea = document.getElementById("idSearchArea");
+  const studentSelect = document.getElementById("studentSelect");
+  const studentIdInput = document.getElementById("studentIdInput");
+
+  if (mode === "id") {
+    emailArea.classList.add("hidden");
+    idArea.classList.remove("hidden");
+    if (studentSelect) studentSelect.value = "";
+  } else {
+    idArea.classList.add("hidden");
+    emailArea.classList.remove("hidden");
+    if (studentIdInput) studentIdInput.value = "";
+  }
+  clearStudentEnrollments();
 }
 
-async function loadCourses() {
+function onStudentSelectionChange() {
+  const studentId = document.getElementById("studentSelect").value;
+  if (!studentId) {
+    clearStudentEnrollments();
+    return;
+  }
+  updateSelectedStudentEnrollments(studentId);
+}
+
+function onStudentIdInput() {
+  const studentId = document.getElementById("studentIdInput").value.trim();
+  if (!studentId) {
+    clearStudentEnrollments();
+    return;
+  }
+  updateSelectedStudentEnrollments(studentId);
+}
+
+function clearStudentEnrollments() {
+  const enrollments = document.getElementById("studentEnrollments");
+  const currentCourses = document.getElementById("currentCourses");
+  if (enrollments) enrollments.classList.add("hidden");
+  if (currentCourses) currentCourses.innerHTML = "No student selected yet.";
+}
+
+function updateSelectedStudentEnrollments(identifier) {
+  const student = studentsCache.find(s => String(s.id) === String(identifier));
+  const enrollments = document.getElementById("studentEnrollments");
+  const currentCourses = document.getElementById("currentCourses");
+
+  if (!student) {
+    if (enrollments) enrollments.classList.remove("hidden");
+    if (currentCourses) currentCourses.innerHTML = `<span class="text-red-500">Student not found.</span>`;
+    return;
+  }
+
+  if (enrollments) enrollments.classList.remove("hidden");
+
+  if (!student.courses || student.courses.length === 0) {
+    if (currentCourses) currentCourses.innerHTML = `<span class="text-gray-500">No courses enrolled yet.</span>`;
+    return;
+  }
+
+  if (currentCourses) {
+    currentCourses.innerHTML = student.courses.map(c => `<span class="inline-flex items-center gap-2 bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-xs font-semibold">${c.title || 'Course'}<span class="text-gray-400">(${c.id})</span></span>`).join(" ");
+  }
+}
+
+async function loadStudents() {
   const container = document.getElementById("courseStudents");
   container.innerHTML = `<div class="flex justify-center p-4"><i class="fas fa-spinner fa-spin text-indigo-500"></i></div>`;
   try {
